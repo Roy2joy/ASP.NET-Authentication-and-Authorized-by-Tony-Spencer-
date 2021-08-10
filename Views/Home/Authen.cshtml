@@ -1,0 +1,28 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Authen</title>
+</head>
+<body>
+    <form asp-action="authPost">
+        <label>
+            User:
+        </label>
+        <input type="text" name="email" id="email" />
+        <label>
+            Password:
+        </label>
+        <input type="text" name="pswd" id="pswd" />
+
+        <button type="submit">submit</button>
+
+    </form>
+</body>
+</html>
