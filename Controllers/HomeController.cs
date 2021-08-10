@@ -22,6 +22,8 @@ namespace WebApplication1.Controllers
             _logger = logger;
         }
 
+
+        //landing page
         public IActionResult Index()
         {
             return View();
@@ -45,6 +47,9 @@ namespace WebApplication1.Controllers
             return View();
         }
 
+
+        //only authenticated user and authorized user(whose role is admin) can enter 
+        //this action
         [Authorize(Roles ="Admin")]
         public IActionResult Secured()
         {
