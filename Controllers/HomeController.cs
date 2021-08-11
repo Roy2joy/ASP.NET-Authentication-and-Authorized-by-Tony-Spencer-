@@ -21,8 +21,6 @@ namespace WebApplication1.Controllers
         {
             _logger = logger;
         }
-
-
         //landing page
         public IActionResult Index()
         {
@@ -50,7 +48,7 @@ namespace WebApplication1.Controllers
 
         //only authenticated user and authorized user(whose role is admin) can enter 
         //this action
-        [Authorize(Roles ="Admin")]
+        [Authorize]
         public IActionResult Secured()
         {
             return View();
@@ -107,6 +105,10 @@ namespace WebApplication1.Controllers
         {
             await HttpContext.SignOutAsync(); //this will delete user from claims and
             //remove its cookies.
+
+            //use this if you want to logout user from its google account also
+            //return Redirect(@"https://www.google.com/accounts/Logout?continue=https://appengine.google.com/ ah/logout?continue=https://localhost:44398");
+
             return Redirect("/");
         }
 
