@@ -48,9 +48,10 @@ namespace WebApplication1.Controllers
 
         //only authenticated user and authorized user(whose role is admin) can enter 
         //this action
-        [Authorize]
-        public IActionResult Secured()
+        [Authorize(Roles ="Admin")]
+        public async Task<IActionResult> Secured()
         {
+            var idToken = await HttpContext.GetTokenAsync("id_token");
             return View();
         }
 

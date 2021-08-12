@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -9,6 +10,7 @@ using Microsoft.Extensions.Hosting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace WebApplication1
@@ -32,11 +34,11 @@ namespace WebApplication1
             /*
              * for our project we use authentication with cookie scheme
              */
-            services.AddAuthentication(options=>
+            services.AddAuthentication(options =>
             {
                 //these 2 services have to set for google accounts
                 options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = "GoogleOpenID";
             })
                 .AddCookie(options =>
                 {
@@ -59,25 +61,60 @@ namespace WebApplication1
                         }
                     };
                 })
-                .AddGoogle(options =>
-                {
-                    //to add google auth service (have to provide secret,client id)
-                    //normally we put this in user config file and use configuration manager to get
-                    //these value backup but for simplicity we directly copy paste it.
+                .AddOpenIdConnect("GoogleOpenID", options =>
+                 {
+                     //openID is online auth providers which  can use different services
+                     //such as google,Facebook etc
+                     //authentication using OPENID (which uses google authentication)
+                     options.Authority = "https://accounts.google.com";
+                     options.ClientId = "431349360298-02i52k29715rm93hr9lg4rq8enu6ubb4.apps.googleusercontent.com";
+                     options.ClientSecret = "BmD_bApJdOVvPlazeh81uEH_";
+                     options.CallbackPath = "/auth";  //calls after auth  is made by google 
+                     
+                     //this will behave same as for google
+                     //options.AuthorizationEndpoint += "?prompt=consent";
+                     options.Prompt = "consent";
 
-                    //these 2 will be provided by google developer account once you setup your app for auth service
-                    options.ClientId = "431349360298-02i52k29715rm93hr9lg4rq8enu6ubb4.apps.googleusercontent.com";
-                    options.ClientSecret = "BmD_bApJdOVvPlazeh81uEH_"; 
-                    
-                    options.CallbackPath = "/auth";  //calls after auth  is made by google 
-                    
-                    /*
-                     * This will allow google user to select different google account,else it will
-                     * automatically pick current logged in google account as your default account
-                     * to enter this app
-                     */
-                    options.AuthorizationEndpoint += "?prompt=consent";
+
+                     //this will allow token to be stored in cookie
+                     options.SaveTokens = true;
+
+                     options.Events = new OpenIdConnectEvents()
+                     {
+                         OnTokenValidated = async context =>
+                          {
+                              //name identifier is unique(unique for all users,will check it with different user) 
+                              //for safe side you can implement (2 way check --> name identifier and its issuer:which is google)
+                              if (context.Principal.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value == "108110384759256930485")
+                              {
+                                var claim = new Claim(ClaimTypes.Role,"Admin");
+                                var claimsIdentity = context.Principal.Identity as ClaimsIdentity;
+                                  claimsIdentity.AddClaim(claim);
+                              }
+                              
+                          }
+                     };
+
                 });
+                //.AddGoogle(options =>
+                //{
+                //    //to add google auth service (have to provide secret,client id)
+                //    //normally we put this in user config file and use configuration manager to get
+                //    //these value backup but for simplicity we directly copy paste it.
+
+                //    //these 2 will be provided by google developer account once you setup your app for auth service
+                //    options.ClientId = "431349360298-02i52k29715rm93hr9lg4rq8enu6ubb4.apps.googleusercontent.com";
+                //    options.ClientSecret = "BmD_bApJdOVvPlazeh81uEH_"; 
+                    
+                //    options.CallbackPath = "/auth";  //calls after auth  is made by google 
+                    
+                //    /*
+                //     * This will allow google user to select different google account,else it will
+                //     * automatically pick current logged in google account as your default account
+                //     * to enter this app
+                //     */
+                //    options.AuthorizationEndpoint += "?prompt=consent";
+                //});
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
