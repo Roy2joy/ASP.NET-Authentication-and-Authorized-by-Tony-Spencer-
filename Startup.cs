@@ -66,9 +66,10 @@ namespace WebApplication1
                      //openID is online auth providers which  can use different services
                      //such as google,Facebook etc
                      //authentication using OPENID (which uses google authentication)
+                     var temp =Configuration["AppName"];
                      options.Authority = "https://accounts.google.com";
-                     options.ClientId = "431349360298-02i52k29715rm93hr9lg4rq8enu6ubb4.apps.googleusercontent.com";
-                     options.ClientSecret = "BmD_bApJdOVvPlazeh81uEH_";
+                     options.ClientId = Configuration["OG:ClientID"];
+                     options.ClientSecret = Configuration["OG:ClientSecret"];
                      options.CallbackPath = "/auth";  //calls after auth  is made by google 
                      
                      //this will behave same as for google
